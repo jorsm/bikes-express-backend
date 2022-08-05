@@ -22,8 +22,8 @@ module.exports.getBike = async (req, res, next) => {
   const { bikeId } = req.params;
   const bike = await Bike.findOne({ _id: bikeId });
   if (!bike) throw new NotFoundError(`bike ${bikeId} not found`);
-  if (!user);
-  res.status(200);
+  const { id, name, status, conditions } = bike;
+  res.status(200).json({ id, name, status, conditions });
 };
 
 module.exports.updateBikeLocation = async (req, res, next) => {

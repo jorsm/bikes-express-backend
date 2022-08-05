@@ -1,5 +1,6 @@
 const passport = require("passport");
-const { BadRequestError } = require("../errors");
+require("./passport")(passport);
+const { UnauthorizedError } = require("../errors");
 const errorHandlerMiddleware = require("../middleware/error-handler");
 module.exports = {};
 module.exports.jwtUserAuth = (req, res, next) => {
@@ -8,7 +9,7 @@ module.exports.jwtUserAuth = (req, res, next) => {
     { session: false },
     function (err, user, info) {
       if (err || info instanceof Error) {
-        err = info || BadRequestError(err);
+        err = info || new UnauthorizedError(err);
         errorHandlerMiddleware(err, req, res, next);
       }
       if (user) {
@@ -16,4 +17,52 @@ module.exports.jwtUserAuth = (req, res, next) => {
       }
     }
   )(req, res, next);
+};
+
+module.exports.emailLogin = async (req, res, next) => {
+  passport.authenticate("local", authCallback(req, res, next))(req, res, next);
+};
+
+/*  Sign in/up with Facebook */
+module.exports.facebookLoginRequest = async (req, res, next) => {
+  passport.authenticate("facebook")(req, res, next);
+};
+
+module.exports.facebookLoginResponse = async (req, res, next) => {
+  passport.authenticate(
+    "facebook",
+    { session: false },
+    authCallback(req, res, next)
+  )(req, res, next);
+};
+
+/*  Sign in/up with Google */
+module.exports.googleLoginRequest = async (req, res, next) => {
+  passport.authenticate("google", { scope: ["email"] })(req, res, next);
+};
+module.exports.googleLoginResponse = async (req, res, next) => {
+  passport.authenticate(
+    "google",
+    { session: false },
+    authCallback(req, res, next)
+  )(req, res, next);
+};
+/**
+ * Init new JWT token for user, manage errors
+ *
+ * @param {*} req
+ * @param {*} res
+ * @returns a function(err, user) that is executed after the local authentication process
+ */
+const authCallback = (req, res, next) => {
+  return function (err, user) {
+    let resJson = {};
+    if (err) {
+      errorHandlerMiddleware(err, req, res, next);
+    }
+    if (user) {
+      resJson = { email: user.email, token: user.createJWT() };
+      res.status(StatusCodes.OK).json(resJson);
+    }
+  };
 };

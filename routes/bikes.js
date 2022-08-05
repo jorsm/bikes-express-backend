@@ -10,10 +10,11 @@ const {
 const { jwtUserAuth } = require("../middleware/authentication");
 
 router.get("/", getAllBikes);
-router.post("/", createBike);
 router.get("/:bikeId", getBike);
-
-router.patch("/location/:bikeId", jwtUserAuth);
 router.get("/location/:bikeId", getBikeLocations);
+
+router.post("/", createBike);
+
+router.patch("/location/:bikeId", jwtUserAuth, updateBikeLocation);
 
 module.exports = router;

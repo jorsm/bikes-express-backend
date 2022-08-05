@@ -13,7 +13,6 @@ const {
 } = require("../errors");
 
 const User = require("../db/models/User");
-const { db } = require("../db/models/User");
 
 module.exports = function (passport) {
   // passport.use(new StrategyType( {options}, verify(...strategyParams) ))
@@ -89,33 +88,26 @@ module.exports = function (passport) {
     )
   );
   /**
-   * JWT Tokens used for client API auth from users and brocker
+   * JWT Tokens used for client API auth from users and mqtt Brocker
    */
   passport.use(
     "user-jwt",
     new JwtStrategy(
       {
         secretOrKey: process.env.USER_JWT_SECRET,
-        jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme("jwt"),
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       },
-      function (...args) {
-        postgressMiddlwareEnd(done)(null, { id: jwt_payload.id });
+      function (jwtPayload, done) {
+        if (jwtPayload.id)
+          postgressMiddlwareEnd(done)(null, { id: jwtPayload.id });
+        else
+          postgressMiddlwareEnd(done)(
+            "Authentication failed, please login again"
+          );
       }
     )
   );
 
-  passport.use(
-    "mqtt-broker-jwt",
-    new JwtStrategy(
-      {
-        secretOrKey: process.env.MQTT_BROKER_JWT_SECRET,
-        jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme("jwt"),
-      },
-      function (jwt_payload, done) {
-        User.findOne({ id: jwt_payload.id }, postgressMiddlwareEnd(done));
-      }
-    )
-  );
   /**
    * Common utils
    */

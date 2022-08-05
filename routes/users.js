@@ -6,7 +6,7 @@ const {
   googleLoginResponse,
   facebookLoginRequest,
   facebookLoginResponse,
-} = require("../controllers/users");
+} = require("../middleware/authentication");
 
 router.post("/login/email", emailLogin);
 

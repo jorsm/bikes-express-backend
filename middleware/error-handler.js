@@ -1,5 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
-const { CustomAPIError } = require("../errors");
+const { CustomAPIError, UnauthorizedError } = require("../errors");
 const errorHandlerMiddleware = (err, req, res, next) => {
   let customError = {
     // set default
@@ -24,8 +24,11 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     customError.statusCode = 404;
   }
 
-  if (err instanceof CustomAPIError) {
-    return res.status(err.statusCode).json({ error: err.message });
+  if (err instanceof UnauthorizedError) {
+    return res
+      .status(err.statusCode)
+      .json({ error: err.message })
+      .redirect("/user/login");
   }
   console.error(err);
   return res.status(customError.statusCode).json({ error: customError.error });

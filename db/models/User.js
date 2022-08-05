@@ -47,7 +47,7 @@ UserSchema.methods.comparePassword = async function (canditatePassword) {
 UserSchema.methods.createJWT = function () {
   //ToDo: Use RSA?? need private key file
   //return jwt.sign({ userId: this._id }, privateKey, { algorithm: 'RS256', expiresIn: process.env.JWT_LIFETIME,});
-  return jwt.sign({ userId: this._id }, process.env.USER_JWT_SECRET, {
+  return jwt.sign({ id: this._id }, process.env.USER_JWT_SECRET, {
     expiresIn: process.env.JWT_LIFETIME,
   });
 };
