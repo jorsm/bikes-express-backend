@@ -1,4 +1,3 @@
-const { MULTI_STATUS } = require("http-status-codes");
 const mongoose = require("mongoose");
 
 const BikeSchema = new mongoose.Schema(
@@ -14,12 +13,12 @@ const BikeSchema = new mongoose.Schema(
       type: String,
       enum: {
         values: [
-          "repaired", //Bike ready but not avaiable yet for rent
+          "repaired", //Bike ready but not available yet for rent
           "broken", //Bike flaged to repair
           "repairing", //Bike picked up to repair
           "locked", //Bike on active rent and locked
           "rented", //Bike on active rent and unlocked
-          "avaiable", //Bike avaiable for rent
+          "available", //Bike available for rent
         ],
         message: "{VALUE} is not supported",
       },
@@ -29,5 +28,14 @@ const BikeSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+BikeSchema.methods.startRent = function () {
+  this.status = "rented";
+  this.save();
+};
+BikeSchema.methods.endRent = async function () {
+  this.status = this.conditions > 2.5 ? "available" : "broken";
+  this.save();
+};
 
 module.exports = mongoose.model("Bike", BikeSchema);

@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const { BadRequestError } = require("../../errors");
 const errorHandlerMiddleware = require("../../middleware/error-handler");
 const Bike = require("./Bike");
+const User = require("./User");
 const Station = require("./Station");
 
 const RentSchema = new mongoose.Schema(
@@ -30,48 +31,57 @@ const RentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-RentSchema.methods.start = async function (bikeId, userId, startStationId) {
-  //ToDo: check if bike is present in station
-  //ToDo: unpark bike
-  //mongoose translates findById(undefined) into findOne({ _id: null })
-  //!! findOne({ _id: undefined }) are equivalent to findOne({}) and return arbitrary documents!!
-  /*
-  self = this;
-  await Bike.findById(bikeId,callback = (err, bike)=>{
-      if(err) return err
-      if (!bike || bike.status != "avaiable") return new BadRequestError('bike not avaiable for rent')
-  });
-  await User.findById(userId,callback = (err, user)=>{
-    if(err) return err
-    if (!user) return new BadRequestError('user not found')
-    //ToDo: check valid payment status and if first_rent
-});
-await Station.findByOne({bikes: bikeId},callback = (err, station)=>{
-  //ToDo: i could directly send the station Id in the request...
-  if(err) return err
-  if (!station) return new BadRequestError('station not avaiable')
-  station.unpark(bikeId);
-});
+RentSchema.methods.startRent = async function (bikeId, userId, startStationId) {
+  let checks = [
+    Bike.findById(bikeId).exec(),
+    User.findById(userId).exec(),
+    Station.findById(startStationId).exec(),
+  ];
 
-
-this.userId = userId;
-this.startStationId = startStationId;
-self.save();
-*/
-  let checkBike = Bike.findById(bikeId).exec();
-  let checkUser = User.findById(userId).exec();
-  let checkStation = Station.findByid(startStationId).exec();
-
-  Promise.all([checkBike, checkUser, checkStation]).then((...results) => {
-    if (!results.bike || results.bike.status != "avaiable")
-      throw new BadRequestError("bike not avaiable for rent");
-  });
+  return await Promise.all(checks)
+    .then(async ([bike, user, station]) => {
+      if (!bike || bike.status != "available")
+        throw new BadRequestError("bike not available for rent");
+      if (!user) throw new BadRequestError("user not found");
+      //ToDo: check valid payment status and if first_rent
+      if (!station) throw new BadRequestError("station not available");
+      if (!station.bikes.includes(bikeId))
+        throw new BadRequestError("bike not parked here");
+      try {
+        this.bikeId = bikeId;
+        this.userId = userId;
+        this.startStationId = startStationId;
+        return await this.save().then((rent) => {
+          return { rent, bike, station };
+        });
+      } catch (error) {
+        throw error;
+      }
+    })
+    .catch((error) => {
+      throw error;
+    });
 };
 
-RentSchema.methods.end = async function (endStationId) {
-  stationFull = station.capacity - station.bikes.size > 0 ? true : false;
-  await Station.findById();
+RentSchema.methods.endRent = async function (bikeId, userId, endStationId) {
+  if (bikeId !== this.bikeId.toString())
+    throw new BadRequestError("can not end this rent fot this bike");
+  if (userId !== this.userId.toString())
+    throw new BadRequestError("can not end this rent fot this user");
   this.endStationId = endStationId;
-  this.save();
+
+  return await Station.findById(endStationId).then(async (station) => {
+    stationFull = station.capacity - station.bikes.length > 0 ? false : true;
+    if (stationFull)
+      throw new BadRequestError("station full,  can not end rent here");
+    let checks = [
+      this.save(),
+      Bike.findById(bikeId).exec(),
+      User.findById(userId).exec(),
+    ];
+    return await Promise.all(checks).then(([rent, bike]) => {
+      return { rent, bike, station };
+    });
+  });
 };
 module.exports = mongoose.model("Rent", RentSchema);

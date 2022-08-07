@@ -10,6 +10,7 @@ const {
   returnBike,
   lockBike,
   unlockBike,
+  bookBike,
 } = require("../controllers/bikes");
 const { jwtUserAuth } = require("../middleware/authentication");
 
@@ -17,11 +18,12 @@ router.get("/", getAllBikes);
 router.get("/:bikeId", getBike);
 router.get("/location/:bikeId", getBikeLocations);
 
+router.post("/", createBike);
 router.post("/rent/:bikeId", jwtUserAuth, rentBike);
 router.post("/return/:bikeId", jwtUserAuth, returnBike);
 router.post("/lock/:bikeId", jwtUserAuth, lockBike);
 router.post("/unlock/:bikeId", jwtUserAuth, unlockBike);
-router.post("/", createBike);
+router.post("/book/:bikeId", jwtUserAuth, bookBike);
 
 router.patch("/location/:bikeId", jwtUserAuth, updateBikeLocation);
 

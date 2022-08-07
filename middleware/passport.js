@@ -134,10 +134,11 @@ const postgressMiddlwareEnd = function (done) {
       });
     }
     if (user) {
-      user = user.value; //Raw to Model object
-      done(null, user);
+      //ToDo: change to instanceof?
+      user = user.value || user; //in case Raw was passed, cast to Model object
+      done(null, user, info);
     } else {
-      done(null, false);
+      done(null, false, info);
     }
   };
 };

@@ -38,4 +38,13 @@ const StationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+StationSchema.methods.startRent = async function (bikeId) {
+  this.bikes = this.bikes.filter((_bikeId) => _bikeId != bikeId);
+  this.save();
+};
+StationSchema.methods.endRent = async function (bikeId) {
+  if (!this.bikes.includes(bikeId)) this.bikes.push(bikeId);
+  this.save();
+};
+
 module.exports = mongoose.model("Station", StationSchema);
