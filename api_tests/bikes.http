@@ -1,0 +1,37 @@
+// ctrl+alt+E to activate local env in the file
+@apiPath=/bikes
+@host={{base_url}}{{apiPath}}
+
+@bikeID=62ebf25fe8749c4e5ee1ae93
+
+### Get All Bikes
+GET /
+
+###
+# Get Bike Details
+GET /{{bikeID}}
+### Add New Bike
+POST /
+    Content-Type: application/json
+    Authorization: Bearer {{jwtToken}}
+
+{"name":"Franco"}
+
+### Get Last Bike Location(s)
+GET /location/{{bikeID}}
+    ?limit=5
+### Update Bike Location
+PATCH /location/{{bikeID}}
+Authorization: Bearer {{jwtToken}}
+
+{
+    "location":{
+        "latitude": 100,
+        "longitude": 100
+    }
+}
+### Rent Bike
+POST /rent/{{bikeID}}
+    Content-Type: application/json
+    Authorization: Bearer {{jwtToken}}
+{"startStation": "yolo123"}

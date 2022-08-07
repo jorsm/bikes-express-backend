@@ -2,6 +2,7 @@ const passport = require("passport");
 require("./passport")(passport);
 const { UnauthorizedError } = require("../errors");
 const errorHandlerMiddleware = require("../middleware/error-handler");
+const { StatusCodes } = require("http-status-codes");
 module.exports = {};
 module.exports.jwtUserAuth = (req, res, next) => {
   passport.authenticate(
@@ -15,6 +16,7 @@ module.exports.jwtUserAuth = (req, res, next) => {
       if (user) {
         req.user = user;
       }
+      next();
     }
   )(req, res, next);
 };

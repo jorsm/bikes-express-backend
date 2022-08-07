@@ -1,7 +1,12 @@
 const passport = require("passport");
 const Bike = require("../db/models/Bike");
 const Location = require("../db/models/Location");
-const { NotFoundError, BadRequestError } = require("../errors");
+const Rent = require("../db/models/Rent");
+const {
+  NotFoundError,
+  BadRequestError,
+  UnauthorizedError,
+} = require("../errors");
 const errorHandlerMiddleware = require("../middleware/error-handler");
 module.exports = {};
 
@@ -68,3 +73,23 @@ module.exports.getBikeLocations = async (req, res, next) => {
   resObj.id = bikeId;
   res.status(200).json(resObj);
 };
+
+module.exports.rentBike = async (req, res, next) => {
+  /**
+   * TODO: sanitize user input
+   **/
+  let rent = {};
+  const { bikeId } = req.params;
+  const { startStationId } = req.body;
+  const userId = req.user.id;
+  try {
+    rent = new Rent().start(bikeId, userId, startStationId);
+  } catch (error) {
+    console.log(error);
+  }
+
+  res.status(200).json(rent);
+};
+module.exports.returnBike = async (req, res, next) => {};
+module.exports.lockBike = async (req, res, next) => {};
+module.exports.unlockBike = async (req, res, next) => {};
