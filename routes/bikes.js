@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {
-  getAllBikes,
+  getAvailableBikes,
   createBike,
   getBike,
   getBikeLocations,
@@ -14,7 +14,7 @@ const {
 } = require("../controllers/bikes");
 const { jwtUserAuth } = require("../middleware/authentication");
 
-router.get("/", getAllBikes);
+router.get("/", getAvailableBikes);
 router.get("/:bikeId", getBike);
 router.get("/location/:bikeId", getBikeLocations);
 

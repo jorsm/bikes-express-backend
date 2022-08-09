@@ -2,7 +2,7 @@
 @apiPath=/bikes
 @host={{base_url}}{{apiPath}}
 
-@bikeID=62ea8b6b812d11aa73b7ea78
+@bikeID=62ea8b6b812d11aa73b7ea79
 @stationId=62efeb6ebc0d3ca314556246
 
 ### Get All Bikes
