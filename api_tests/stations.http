@@ -1,0 +1,13 @@
+@apiPath=/stations
+@host={{base_url}}{{apiPath}}
+
+### Get Start stations 
+GET url HTTP/1.1
+    Content-Type: application/json
+///{longitude, latitude, radius}
+
+### Get End stations 
+GET url HTTP/1.1
+    Content-Type: application/json
+    Authorization: Bearer {{jwtToken}}
+{}

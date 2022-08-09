@@ -99,7 +99,7 @@ module.exports.rentBike = async (req, res) => {
     userId,
     startStationId
   );
-
+  //ToDo: check valid payment status and if first_rent
   bike.startRent();
   station.startRent(bikeId);
   res.status(StatusCodes.CREATED).json({ id: rent.id });
@@ -117,7 +117,7 @@ module.exports.returnBike = async (req, res) => {
   const { bikeId } = req.params;
   const { endStationId, rentId } = req.body;
   const userId = req.user.id;
-  //ToDo: check valid payment status and if first_rent
+
   let rent = await Rent.findById(rentId);
   if (!rent) throw new BadRequestError("rentId is not valid");
   let { bike, station } = await rent.endRent(bikeId, userId, endStationId);

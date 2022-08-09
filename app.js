@@ -11,6 +11,7 @@ const forceHttpsMiddleware = require("./middleware/force-https");
 
 const bikesRouter = require("./routes/bikes");
 const usersRouter = require("./routes/users");
+const stationsRouter = require("./routes/stations");
 
 const express = require("express");
 const app = express();
@@ -29,6 +30,7 @@ if (process.env.NODE_ENV !== "devel") {
 //Routes
 app.use("/api/v1/bikes", bikesRouter);
 app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/stations", stationsRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

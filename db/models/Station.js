@@ -21,6 +21,7 @@ const StationSchema = new mongoose.Schema(
         type: [Number],
         required: true,
       },
+      index: "2dsphere",
     },
     // max # of bikes parked at the same time
     capacity: {
