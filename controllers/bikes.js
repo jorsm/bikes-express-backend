@@ -3,6 +3,8 @@ const Location = require("../db/models/Location");
 const Rent = require("../db/models/Rent");
 const { NotFoundError, BadRequestError } = require("../errors");
 const { StatusCodes } = require("http-status-codes");
+const { MAX_RENTS_PER_DAY } = require("../utils/configs");
+
 module.exports = {};
 
 module.exports.getAvailableBikes = async (req, res) => {
@@ -90,9 +92,11 @@ module.exports.rentBike = async (req, res) => {
     userId: req.user.id,
     startedAt: { $gte: midnight },
   });
-  const maxRents = process.env.MAX_RENTS_PER_DAY;
+
   if (todayRents >= maxRents)
-    throw new BadRequestError("cannot rent more than " + maxRents + "per day");
+    throw new BadRequestError(
+      "cannot rent more than " + MAX_RENTS_PER_DAY + "per day"
+    );
   //ToDo: manage on frontend?
 
   const { bikeId } = req.params;
@@ -142,15 +146,4 @@ module.exports.returnBike = async (req, res) => {
 };
 module.exports.lockBike = async (req, res) => {};
 module.exports.unlockBike = async (req, res) => {};
-module.exports.bookBike = async (req, res) => {
-  /**
-   * ToDo: sanitize user input
-   */
-  const { bikeId } = req.params;
-  const bookingTimeout = Number(process.env.BOOKING_TIMEOUT) * 1000;
-  await Bike.findById(bikeId)
-    .then((bike) => {})
-    .catch((error) => {
-      throw error;
-    });
-};
+module.exports.bookBike = async (req, res) => {};

@@ -5,6 +5,11 @@ const { NotFoundError, BadRequestError } = require("../errors");
 const errorHandlerMiddleware = require("../middleware/error-handler");
 const { StatusCodes } = require("http-status-codes");
 const Station = require("../db/models/Station");
+const {
+  DEFAULT_LATITUDE,
+  DEFAULT_LONGITUDE,
+  DEFAULT_SEARCH_RADIUS,
+} = require("../utils/configs");
 module.exports = {};
 
 module.exports.getStartStations = async (req, res, next) => {
@@ -22,9 +27,9 @@ module.exports.getEndStations = async (req, res, next) => {
 const getCoordinatesFromReq = (req) => {
   //Valid longitude values are between -180 and 180, both inclusive.
   //Valid latitude values are between -90 and 90, both inclusive.
-  const longitude = req.body.longitude || process.env.DEFAULT_LONGITUDE;
-  const latitude = req.body.longitude || process.env.DEFAULT_LATITUDE;
-  const radius = req.body.radius || process.env.DEFAULT_SEARCH_RADIUS;
+  const longitude = req.body.longitude || DEFAULT_LONGITUDE;
+  const latitude = req.body.longitude || DEFAULT_LATITUDE;
+  const radius = req.body.radius || DEFAULT_SEARCH_RADIUS;
 
   return { longitude, latitude, radius };
 };

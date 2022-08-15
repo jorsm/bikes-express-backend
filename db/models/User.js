@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { UnauthorizedError } = require("../../errors");
+const { JWT_LIFETIME } = require("../../utils/configs");
 //const privateKey = fs.readFileSync("private.key");
 
 const UserSchema = new mongoose.Schema(
@@ -48,7 +49,7 @@ UserSchema.methods.createJWT = function () {
   //ToDo: Use RSA?? need private key file
   //return jwt.sign({ userId: this._id }, privateKey, { algorithm: 'RS256', expiresIn: process.env.JWT_LIFETIME,});
   return jwt.sign({ id: this._id }, process.env.USER_JWT_SECRET, {
-    expiresIn: process.env.JWT_LIFETIME,
+    expiresIn: JWT_LIFETIME,
   });
 };
 
