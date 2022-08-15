@@ -6,7 +6,11 @@ const { StatusCodes } = require("http-status-codes");
 module.exports = {};
 
 module.exports.getAvailableBikes = async (req, res) => {
-  const bikes = await Bike.find({ status: "available" });
+  if (!req.body.ids) {
+    throw new BadRequestError("ids are required");
+  }
+  const ids = req.body.ids;
+  const bikes = await Bike.find({ id: { $in: ids }, status: "available" });
   res.status(StatusCodes.OK).json({ bikes });
 };
 
@@ -39,7 +43,7 @@ module.exports.updateBikeLocation = async (req, res) => {
     longitude = Number(longitude);
     latitude = Number(latitude);
     if (!latitude || !longitude)
-      throw new BadRequestError(`location provided is not valid`);
+      throw new BadRequestError("location provided is not valid");
 
     bikeLocation = await Location.create({
       bikeId: bike._id,

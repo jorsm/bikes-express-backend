@@ -21,7 +21,6 @@ const StationSchema = new mongoose.Schema(
         type: [Number],
         required: true,
       },
-      index: "2dsphere",
     },
     // max # of bikes parked at the same time
     capacity: {
@@ -32,12 +31,14 @@ const StationSchema = new mongoose.Schema(
     // meters from 'location' in wich ending rent is allowed
     radius: {
       type: Number,
-      default: 2,
+      default: 5,
       min: 1,
     },
   },
   { timestamps: true }
 );
+
+StationSchema.index({ location: "2dsphere" });
 
 StationSchema.methods.startRent = async function (bikeId) {
   this.bikes = this.bikes.filter((_bikeId) => _bikeId != bikeId);

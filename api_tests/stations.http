@@ -1,13 +1,14 @@
+// ctrl+alt+E to activate local env in the file
 @apiPath=/stations
 @host={{base_url}}{{apiPath}}
 
 ### Get Start stations 
-GET url HTTP/1.1
-    Content-Type: application/json
+POST / HTTP/1.1
+    //Content-Type: application/json
 ///{longitude, latitude, radius}
 
 ### Get End stations 
-GET url HTTP/1.1
+POST /return HTTP/1.1
     Content-Type: application/json
     Authorization: Bearer {{jwtToken}}
-{}
+///{longitude, latitude, radius}

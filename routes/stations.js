@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { getStartStations, getEndStations } = require("../controllers/bikes");
+const { getStartStations, getEndStations } = require("../controllers/stations");
 const { jwtUserAuth } = require("../middleware/authentication");
 
-router.get("/", getStartStations);
-router.get("/return", jwtUserAuth, getEndStations);
+router.post("/", getStartStations);
+router.post("/return", jwtUserAuth, getEndStations);
 
 module.exports = router;

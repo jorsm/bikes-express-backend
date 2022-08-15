@@ -8,12 +8,29 @@ const Station = require("../db/models/Station");
 module.exports = {};
 
 module.exports.getStartStations = async (req, res, next) => {
+  const filter = (station) => station.bikes.length > 0;
+  const stations = await getStations(req, filter);
+  res.status(StatusCodes.OK).json(stations);
+};
+
+module.exports.getEndStations = async (req, res, next) => {
+  const filter = (station) => station.capacity - station.bikes.length > 0;
+  const stations = await getStations(req, filter);
+  res.status(StatusCodes.OK).json(stations);
+};
+
+const getCoordinatesFromReq = (req) => {
   //Valid longitude values are between -180 and 180, both inclusive.
   //Valid latitude values are between -90 and 90, both inclusive.
-
   const longitude = req.body.longitude || process.env.DEFAULT_LONGITUDE;
   const latitude = req.body.longitude || process.env.DEFAULT_LATITUDE;
   const radius = req.body.radius || process.env.DEFAULT_SEARCH_RADIUS;
+
+  return { longitude, latitude, radius };
+};
+
+const getStations = async (req, filter) => {
+  const { longitude, latitude, radius } = getCoordinatesFromReq(req);
 
   const stations = await Station.find({
     location: {
@@ -23,8 +40,9 @@ module.exports.getStartStations = async (req, res, next) => {
       },
     },
   });
-  const _stations = stations.map(({ location, bikes }) => {
-    return { location, bikes };
+  return stations.filter(filter).map(({ location, bikes }) => {
+    const longitude = location.coordinates[0];
+    const latitude = location.coordinates[1];
+    return { location: { longitude, latitude }, bikes };
   });
-  res.status(StatusCodes.OK).json(_stations);
 };
