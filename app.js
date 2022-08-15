@@ -13,6 +13,8 @@ const bikesRouter = require("./routes/bikes");
 const usersRouter = require("./routes/users");
 const stationsRouter = require("./routes/stations");
 
+const cors = require("cors");
+
 const express = require("express");
 const app = express();
 
@@ -21,6 +23,8 @@ app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-
 app.use(bodyParser.json()); // parse application/json
 app.use(express.static("./public"));
 app.use(passport.initialize());
+app.use(cors());
+app.options("*", cors());
 
 //force https in production
 if (process.env.NODE_ENV !== "devel") {
