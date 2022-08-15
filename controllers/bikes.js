@@ -7,7 +7,7 @@ const { MAX_RENTS_PER_DAY } = require("../utils/configs");
 
 module.exports = {};
 
-module.exports.getAvailableBikes = async (req, res) => {
+module.exports.getBikes = async (req, res) => {
   if (!req.body.ids) {
     throw new BadRequestError("ids are required");
   }
@@ -17,16 +17,28 @@ module.exports.getAvailableBikes = async (req, res) => {
 };
 
 module.exports.createBike = async (req, res) => {
-  /**
-   * TODO: sanitize user input
-   **/
-  const bike = await Bike.create({ name: req.body.name });
+  const bike = await Bike.create({});
+  if (!bike) throw new Error("unable  to create bike");
+  let alreadyUsed, code;
+  do {
+    code = Math.floor(Math.random() * 1000000);
+    alreadyUsed = await Bike.findOne({ code });
+  } while (alreadyUsed);
+  bike.code = code;
+  await bike.save();
   res.status(StatusCodes.CREATED).json({ bike });
 };
 
 module.exports.getBike = async (req, res) => {
   const { bikeId } = req.params;
   const bike = await Bike.findOne({ _id: bikeId });
+  if (!bike) throw new NotFoundError("bike not found");
+  res.status(StatusCodes.OK).json(bike);
+};
+
+module.exports.getBikeByCode = async (req, res) => {
+  const { code } = req.params;
+  const bike = await Bike.findOne({ code });
   if (!bike) throw new NotFoundError("bike not found");
   res.status(StatusCodes.OK).json(bike);
 };

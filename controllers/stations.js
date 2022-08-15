@@ -45,9 +45,9 @@ const getStations = async (req, filter) => {
       },
     },
   });
-  return stations.filter(filter).map(({ location, bikes }) => {
+  return stations.filter(filter).map(({ location, bikes, id }) => {
     const longitude = location.coordinates[0];
     const latitude = location.coordinates[1];
-    return { location: { longitude, latitude }, bikes };
+    return { location: { longitude, latitude }, bikes, id };
   });
 };

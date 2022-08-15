@@ -16,7 +16,6 @@ POST /
     Content-Type: application/json
     Authorization: Bearer {{jwtToken}}
 
-{"name":"Franco"}
 
 ### Get Last Bike Location(s)
 GET /location/{{bikeID}}

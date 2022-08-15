@@ -2,12 +2,8 @@ const mongoose = require("mongoose");
 
 const BikeSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: [true, "must provide name"],
-      trim: true,
-      maxlength: [20, "name can not be more than 20 characters"],
-      minlength: [5, "name can not be less than 5 characters"],
+    code: {
+      type: Number,
     },
     status: {
       type: String,

@@ -23,6 +23,10 @@ app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-
 app.use(bodyParser.json()); // parse application/json
 app.use(express.static("./public"));
 app.use(passport.initialize());
+
+/**
+ * ToDo: CONFIGURE CORS
+ */
 app.use(cors());
 app.options("*", cors());
 
