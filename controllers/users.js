@@ -48,6 +48,6 @@ module.exports.verifyOtp = async (req, res) => {
     throw new UnauthorizedError("otp provided is not valid");
   } else {
     user.otpVerified();
-    res.status(StatusCodes.OK).json(user.jwtToken);
+    res.status(StatusCodes.OK).json({ token: user.jwtToken });
   }
 };
