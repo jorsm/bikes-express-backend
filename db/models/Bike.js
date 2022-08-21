@@ -18,7 +18,7 @@ const BikeSchema = new mongoose.Schema(
         ],
         message: "{VALUE} is not supported",
       },
-      default: "repaired",
+      default: "avaiable", //ToDo change to repaired
     },
     conditions: { type: Number, min: 1, max: 5, default: 4.5 },
   },
@@ -30,8 +30,8 @@ BikeSchema.methods.startRent = function () {
   this.save();
 };
 BikeSchema.methods.endRent = async function () {
-  this.status = this.conditions > 2.5 ? "available" : "broken";
-  this.save();
+  const flagToRepair = this.conditions > 2.5 ? "available" : "broken";
+  this.status.set(flagToRepair);
 };
 
 module.exports = mongoose.model("Bike", BikeSchema);

@@ -34,9 +34,13 @@ const UserSchema = new mongoose.Schema(
 UserSchema.index({ name: 1, phone: 1 }, { unique: true });
 
 UserSchema.virtual("jwtToken").get(function () {
-  return jwt.sign({ id: this._id }, process.env.USER_JWT_SECRET, {
-    expiresIn: JWT_LIFETIME,
-  });
+  return jwt.sign(
+    { id: this._id, name: this.name, familyCode: this.familyCode },
+    process.env.USER_JWT_SECRET,
+    {
+      expiresIn: JWT_LIFETIME,
+    }
+  );
 });
 UserSchema.methods.sendOtpSMS = async function (message, otp) {
   message = message + otp;
