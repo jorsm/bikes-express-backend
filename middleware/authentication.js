@@ -4,6 +4,7 @@ const { UnauthorizedError } = require("../errors");
 const errorHandlerMiddleware = require("../middleware/error-handler");
 const { StatusCodes } = require("http-status-codes");
 module.exports = {};
+
 module.exports.jwtUserAuth = (req, res, next) => {
   passport.authenticate(
     "user-jwt",
@@ -21,11 +22,12 @@ module.exports.jwtUserAuth = (req, res, next) => {
   )(req, res, next);
 };
 
+/*
 module.exports.emailLogin = async (req, res, next) => {
   passport.authenticate("local", authCallback(req, res, next))(req, res, next);
 };
 
-/*  Sign in/up with Facebook */
+/*  Sign in/up with Facebook *
 module.exports.facebookLoginRequest = async (req, res, next) => {
   passport.authenticate("facebook")(req, res, next);
 };
@@ -38,7 +40,7 @@ module.exports.facebookLoginResponse = async (req, res, next) => {
   )(req, res, next);
 };
 
-/*  Sign in/up with Google */
+/*  Sign in/up with Google *
 module.exports.googleLoginRequest = async (req, res, next) => {
   passport.authenticate("google", { scope: ["email"] })(req, res, next);
 };
@@ -55,7 +57,7 @@ module.exports.googleLoginResponse = async (req, res, next) => {
  * @param {*} req
  * @param {*} res
  * @returns a function(err, user) that is executed after the local authentication process
- */
+ *
 const authCallback = (req, res, next) => {
   return function (err, user) {
     let resJson = {};
@@ -63,8 +65,8 @@ const authCallback = (req, res, next) => {
       errorHandlerMiddleware(err, req, res, next);
     }
     if (user) {
-      resJson = { email: user.email, token: user.createJWT() };
+      resJson = { name: user.name, token: user.jwtToken };
       res.status(StatusCodes.OK).json(resJson);
     }
   };
-};
+};*/

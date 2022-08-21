@@ -6,9 +6,7 @@ const errorHandlerMiddleware = require("../middleware/error-handler");
 const { StatusCodes } = require("http-status-codes");
 const Station = require("../db/models/Station");
 const {
-  DEFAULT_LATITUDE,
-  DEFAULT_LONGITUDE,
-  DEFAULT_SEARCH_RADIUS,
+  configs: { DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_SEARCH_RADIUS },
 } = require("../utils/configs");
 module.exports = {};
 

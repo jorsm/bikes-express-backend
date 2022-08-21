@@ -3,11 +3,11 @@
 @host={{base_url}}{{apiPath}}
 
 
-### Sign Up/In by Email
-POST /login/email
+### Sign Up/In with name, phone
+POST /sign-in
     Content-Type: application/json
 
     {
-        "email":"janoradini@gmail.com", 
-        "password": "secret123"
+        "name":"Mario2", 
+        "phone": "+393456677890"
     }

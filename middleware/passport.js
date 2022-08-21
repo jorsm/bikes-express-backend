@@ -18,7 +18,7 @@ module.exports = function (passport) {
   // passport.use(new StrategyType( {options}, verify(...strategyParams) ))
   /**
    * Email and Password
-   */
+  
   passport.use(
     new LocalStrategy(
       {
@@ -54,7 +54,7 @@ module.exports = function (passport) {
   );
   /**
    * Facebook
-   */
+   *
   passport.use(
     new FacebookStrategy(
       {
@@ -74,7 +74,7 @@ module.exports = function (passport) {
   );
   /**
    * Google
-   */
+   *
   passport.use(
     new GoogleStrategy(
       {
@@ -110,7 +110,7 @@ module.exports = function (passport) {
 
   /**
    * Common utils
-   */
+ 
   const updateUser = function (update, email, done = null, callback) {
     const filter = { email },
       options = {
@@ -121,9 +121,10 @@ module.exports = function (passport) {
       };
     update = { $set: update };
     callback = callback || postgressMiddlwareEnd(done);
+  
 
     User.findOneAndUpdate(filter, update, options, callback);
-  };
+        */
 };
 
 const postgressMiddlwareEnd = function (done) {

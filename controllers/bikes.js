@@ -3,7 +3,10 @@ const Location = require("../db/models/Location");
 const Rent = require("../db/models/Rent");
 const { NotFoundError, BadRequestError } = require("../errors");
 const { StatusCodes } = require("http-status-codes");
-const { MAX_RENTS_PER_DAY } = require("../utils/configs");
+const {
+  configs: { MAX_RENTS_PER_DAY },
+} = require("../utils/configs");
+const { getNewBikeCode } = require("../utils");
 
 module.exports = {};
 
@@ -19,12 +22,8 @@ module.exports.getBikes = async (req, res) => {
 module.exports.createBike = async (req, res) => {
   const bike = await Bike.create({});
   if (!bike) throw new Error("unable  to create bike");
-  let alreadyUsed, code;
-  do {
-    code = Math.floor(Math.random() * 1000000);
-    alreadyUsed = await Bike.findOne({ code });
-  } while (alreadyUsed);
-  bike.code = code;
+
+  bike.code = getNewBikeCode();
   await bike.save();
   res.status(StatusCodes.CREATED).json({ bike });
 };
