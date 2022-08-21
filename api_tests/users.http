@@ -11,3 +11,12 @@ POST /sign-in
         "name":"Mario2", 
         "phone": "+393456677890"
     }
+
+### verify otp received to login
+POST /verify
+    Content-Type: application/json
+
+    {
+        "otp":"099817", 
+        "phone": "+393456677890"
+    }

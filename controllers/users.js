@@ -29,15 +29,25 @@ module.exports.signIn = async (req, res) => {
   }
 
   if (user) {
-    //found or created
+    const otp = await getOtp();
+    user.sendOtpSMS(message, otp);
+    user.set({ otp: otp });
+    await user.save();
   } else {
     throw new Error(
       "an error occourred during the account creation, try again later"
     );
   }
-
-  const otp = await getOtp();
-  user.sendOtpSMS(message, otp);
-
   res.end();
+};
+
+module.exports.verifyOtp = async (req, res) => {
+  const { otp, phone } = req.body;
+  let user = await User.findOne({ phone, otp });
+  if (!user) {
+    throw new UnauthorizedError("otp provided is not valid");
+  } else {
+    user.otpVerified();
+    res.status(StatusCodes.OK).json(user.jwtToken);
+  }
 };

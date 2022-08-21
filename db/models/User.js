@@ -48,14 +48,11 @@ UserSchema.methods.sendOtpSMS = async function (message, otp) {
   console.log("set OTP for user: " + otp);
 };
 
-UserSchema.methods.verifyOtp = async function (otp) {
-  let otpVerified = false;
-  if (this.otp === otp) {
-    otpVerified = true;
-    this.otp.set(null);
-  }
-  return otpVerified;
+UserSchema.methods.otpVerified = async function () {
+  this.set({ otp: null });
+  if (!this.phone_verified) this.set({ phone_verified: true });
 };
+
 /*
 UserSchema.methods.hashPassword = async function (password) {
   const salt = await bcrypt.genSalt(10);
