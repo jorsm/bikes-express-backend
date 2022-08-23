@@ -20,10 +20,12 @@ module.exports.signIn = async (req, res) => {
   let message = "Use this code to  sign in:  ";
   let user = await User.findOne({ name, phone }); //check  if user is already registerd
   if (!user) {
+    message = "Use this code to  verify your number:  ";
+    let phoneAlreadyUsed = await User.findOne({ phone });
     //new user
     user = await User.create({ name, phone });
+    if (!phoneAlreadyUsed) user.set({ free_trial: true });
     res.status(StatusCodes.CREATED);
-    message = "Use this code to  verify your number:  ";
     familyCode = await getFamilyCode();
     user.set("familyCode", familyCode);
   }
@@ -38,7 +40,6 @@ module.exports.signIn = async (req, res) => {
       "an error occourred during the account creation, try again later"
     );
   }
-  res.end();
 };
 
 module.exports.verifyOtp = async (req, res) => {

@@ -24,6 +24,7 @@ const UserSchema = new mongoose.Schema(
     familyCode: { type: String, length: 6 },
     otp: { type: String, length: 6, default: null },
     phone_verified: { type: Boolean, default: false },
+    free_trial: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
