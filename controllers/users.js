@@ -40,6 +40,7 @@ module.exports.signIn = async (req, res) => {
       "an error occourred during the account creation, try again later"
     );
   }
+  res.end();
 };
 
 module.exports.verifyOtp = async (req, res) => {

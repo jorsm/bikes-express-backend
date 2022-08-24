@@ -34,7 +34,7 @@ RentSchema.methods.startRent = async function (bikeId, userId, startStationId) {
   let checks = [
     Bike.findById(bikeId).exec(),
     User.findById(userId).exec(),
-    Station.findById(startStationId).exec(),
+    Station.findOne({ bikes: bikeId }).exec(),
   ];
 
   return await Promise.all(checks)

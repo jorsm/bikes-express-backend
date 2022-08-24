@@ -21,7 +21,7 @@ router.get("/code/:code", getBikeByCode);
 router.get("/location/:bikeId", getBikeLocations);
 
 router.post("/", createBike);
-router.post("/rent/:bikeId", jwtUserAuth, rentBike);
+router.post("/rent/:code", jwtUserAuth, rentBike);
 router.post("/return/:bikeId", jwtUserAuth, returnBike);
 router.post("/lock/:bikeId", jwtUserAuth, lockBike);
 router.post("/unlock/:bikeId", jwtUserAuth, unlockBike);

@@ -37,7 +37,6 @@ POST /rent/{{bikeID}}
     Content-Type: application/json
     Authorization: Bearer {{jwtToken}}
 
-{"startStationId": "{{stationId}}"}
 
 ### Return Bike
 POST /return/{{bikeID}}

@@ -12,7 +12,7 @@ module.exports = {};
 
 module.exports.getBikes = async (req, res) => {
   if (!req.body.ids) {
-    throw new BadRequestError("ids are required");
+    throw new BadRequestError("one or more ids are required");
   }
   const ids = req.body.ids;
   const bikes = await Bike.find({ id: { $in: ids }, status: "available" });
@@ -39,7 +39,7 @@ module.exports.getBikeByCode = async (req, res) => {
   const { code } = req.params;
   const bike = await Bike.findOne({ code });
   if (!bike) throw new NotFoundError("bike not found");
-  res.status(StatusCodes.OK).json(bike);
+  res.status(StatusCodes.OK).json({ bikeId: bike.id });
 };
 
 module.exports.updateBikeLocation = async (req, res) => {
@@ -104,21 +104,16 @@ module.exports.rentBike = async (req, res) => {
     startedAt: { $gte: midnight },
   });
 
-  if (todayRents >= maxRents)
+  if (todayRents >= MAX_RENTS_PER_DAY)
     throw new BadRequestError(
       "cannot rent more than " + MAX_RENTS_PER_DAY + "per day"
     );
   //ToDo: manage on frontend?
 
   const { bikeId } = req.params;
-  const { startStationId } = req.body;
   const userId = req.user.id;
-  const { rent, bike, station } = await new Rent().startRent(
-    bikeId,
-    userId,
-    startStationId
-  );
   //ToDo: check valid payment status and if first_rent
+  const { rent, bike, station } = await new Rent().startRent(bikeId, userId);
   bike.startRent();
   station.startRent(bikeId);
   res.status(StatusCodes.CREATED).json({ id: rent.id });
