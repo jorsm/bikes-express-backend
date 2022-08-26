@@ -12,12 +12,12 @@ module.exports.jwtUserAuth = (req, res, next) => {
     function (err, user, info) {
       if (err || info instanceof Error) {
         err = info || new UnauthorizedError(err);
-        errorHandlerMiddleware(err, req, res, next);
+        throw err;
       }
       if (user) {
         req.user = user;
-      }
-      next();
+        next();
+      } else throw new UnauthorizedError("token malformed, please login again");
     }
   )(req, res, next);
 };

@@ -45,4 +45,4 @@ POST /return/{{bikeID}}
 
 {
     "rentId":"62f043861148bff3281d3738",
-    "endStationId": "{{stationId}}"}
+}

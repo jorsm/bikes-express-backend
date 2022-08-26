@@ -30,27 +30,27 @@ const RentSchema = new mongoose.Schema({
   endedAt: { type: Date, default: null },
 });
 
-RentSchema.methods.startRent = async function (bikeId, userId, startStationId) {
+RentSchema.methods.startRent = async function (bikeCode, userId) {
   let checks = [
-    Bike.findById(bikeId).exec(),
+    Bike.findOne({ code: bikeCode, status: "available" }).exec(),
     User.findById(userId).exec(),
-    Station.findOne({ bikes: bikeId }).exec(),
+    Station.findOne({ bikes: bikeCode }).exec(),
   ];
 
   return await Promise.all(checks)
     .then(async ([bike, user, station]) => {
-      if (!bike || bike.status != "available")
-        throw new BadRequestError("bike not available for rent");
+      if (!bike) throw new BadRequestError("bike not available for rent");
       if (!user) throw new BadRequestError("user not found");
-      if (!station) throw new BadRequestError("station not available");
-      if (!station.bikes.includes(bikeId))
-        throw new BadRequestError("bike not parked here");
+      if (!station) throw new BadRequestError("bike not parked here");
+
       try {
-        this.bikeId = bikeId;
+        this.bikeId = bike.id;
         this.userId = userId;
-        this.startStationId = startStationId;
+        this.startStationId = station.id;
         this.startedAt = Date.now();
         const rent = await this.save();
+        bike.startRent();
+        station.startRent(bikeCode);
         return { rent, bike, station };
       } catch (error) {
         throw error;
@@ -61,27 +61,20 @@ RentSchema.methods.startRent = async function (bikeId, userId, startStationId) {
     });
 };
 
-RentSchema.methods.endRent = async function (bikeId, userId, endStationId) {
-  if (bikeId !== this.bikeId.toString())
-    throw new BadRequestError("can not end this rent fot this bike");
-  if (userId !== this.userId.toString())
-    throw new BadRequestError("can not end this rent fot this user");
-  this.endStationId = endStationId;
-  this.endedAt = Date.now();
-
-  const endStation = await Station.findById(endStationId);
-  if (!endStation) throw new BadRequestError("station not available");
+RentSchema.methods.endRent = async function (endStation, userId) {
+  if (!this.userId === userId)
+    throw new BadRequestError("wtf you can only end your own rents!");
   stationFull =
     endStation.capacity - endStation.bikes.length > 0 ? false : true;
   if (stationFull)
     throw new BadRequestError("station full,  can not end rent here");
-  let checks = [
-    this.save(),
-    Bike.findById(bikeId).exec(),
-    User.findById(userId).exec(),
-  ];
-  return await Promise.all(checks).then(([rent, bike]) => {
-    return { rent, bike, station: endStation };
-  });
+
+  this.endStationId = endStation.id;
+  this.endedAt = Date.now();
+
+  this.save();
+  const bike = await Bike.findById(this.bikeId);
+  if (bike) bike.endRent();
+  endStation.endRent(this.bikeId);
 };
 module.exports = mongoose.model("Rent", RentSchema);

@@ -5,8 +5,7 @@ const StationSchema = new mongoose.Schema(
   {
     bikes: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Bike",
+        type: String,
         required: [true, "must provide bike ID"],
       },
     ],
@@ -40,12 +39,12 @@ const StationSchema = new mongoose.Schema(
 
 StationSchema.index({ location: "2dsphere" });
 
-StationSchema.methods.startRent = async function (bikeId) {
-  this.bikes = this.bikes.filter((_bikeId) => _bikeId != bikeId);
+StationSchema.methods.startRent = async function (bikeCode) {
+  this.bikes = this.bikes.filter((_bikeCode) => _bikeCode != bikeCode);
   this.save();
 };
-StationSchema.methods.endRent = async function (bikeId) {
-  if (!this.bikes.includes(bikeId)) this.bikes.push(bikeId);
+StationSchema.methods.endRent = async function (bikeCode) {
+  if (!this.bikes.includes(bikeCode)) this.bikes.push(bikeCode);
   this.save();
 };
 

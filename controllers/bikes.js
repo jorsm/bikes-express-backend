@@ -4,9 +4,15 @@ const Rent = require("../db/models/Rent");
 const { NotFoundError, BadRequestError } = require("../errors");
 const { StatusCodes } = require("http-status-codes");
 const {
-  configs: { MAX_RENTS_PER_DAY },
+  configs: {
+    MAX_RENTS_PER_DAY,
+    DEFAULT_LATITUDE,
+    DEFAULT_LONGITUDE,
+    DEFAULT_SEARCH_RADIUS,
+  },
 } = require("../utils/configs");
 const { getNewBikeCode } = require("../utils");
+const Station = require("../db/models/Station");
 
 module.exports = {};
 
@@ -110,13 +116,12 @@ module.exports.rentBike = async (req, res) => {
     );
   //ToDo: manage on frontend?
 
-  const { bikeId } = req.params;
+  const { code } = req.params;
   const userId = req.user.id;
   //ToDo: check valid payment status and if first_rent
-  const { rent, bike, station } = await new Rent().startRent(bikeId, userId);
-  bike.startRent();
-  station.startRent(bikeId);
-  res.status(StatusCodes.CREATED).json({ id: rent.id });
+  const { rent, bike, station } = await new Rent().startRent(code, userId);
+
+  res.status(StatusCodes.CREATED).json({ rentId: rent.id });
 };
 module.exports.returnBike = async (req, res) => {
   /**
@@ -128,27 +133,25 @@ module.exports.returnBike = async (req, res) => {
    *  the function can be simply called again
    * ToDO: any Downdides?
    */
-  const { bikeId } = req.params;
-  const { endStationId, rentId } = req.body;
-  const userId = req.user.id;
+  const { rentId } = req.params;
 
-  let rent = await Rent.findById(rentId);
+  const longitude = DEFAULT_LONGITUDE;
+  const latitude = DEFAULT_LATITUDE;
+  const radius = DEFAULT_SEARCH_RADIUS;
+  const endStation = await Station.findOne({
+    location: {
+      $near: {
+        $geometry: { type: "Point", coordinates: [longitude, latitude] },
+        $maxDistance: radius,
+      },
+    },
+  });
+
+  let rent = await Rent.findById(rentId, req.user.id);
   if (!rent) throw new BadRequestError("rentId is not valid");
-  let { bike, station } = await rent.endRent(bikeId, userId, endStationId);
-  if (!bike) throw new BadRequestError("bikeId is not valid");
-  if (!station) throw new BadRequestError("stationId is not valid");
+  await rent.endRent(endStation);
 
-  //ToDo: add burn calories, CO2 saved n' stuff
-  let jsonRes = {};
-  if (!bike.status === "rented")
-    jsonRes = {
-      warning: "bike already returned",
-    };
-  else {
-    bike.endRent();
-    station.endRent(bikeId);
-  }
-  res.status(StatusCodes.OK).json(jsonRes);
+  res.status(StatusCodes.OK).end();
 };
 module.exports.lockBike = async (req, res) => {};
 module.exports.unlockBike = async (req, res) => {};

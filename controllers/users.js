@@ -8,6 +8,7 @@ const {
 
 const User = require("../db/models/User");
 const { getFamilyCode, getOtp } = require("../utils");
+const Rent = require("../db/models/Rent");
 
 module.exports = {};
 
@@ -18,12 +19,12 @@ module.exports.signIn = async (req, res) => {
    */
   const { name, phone } = req.body;
   let message = "Use this code to  sign in:  ";
-  let user = await User.findOne({ name, phone }); //check  if user is already registerd
+  let user = await User.findOne({ phone }); //check  if user is already registerd
   if (!user) {
     message = "Use this code to  verify your number:  ";
     let phoneAlreadyUsed = await User.findOne({ phone });
     //new user
-    user = await User.create({ name, phone });
+    user = await User.create({ phone });
     if (!phoneAlreadyUsed) user.set({ free_trial: true });
     res.status(StatusCodes.CREATED);
     familyCode = await getFamilyCode();
@@ -52,4 +53,9 @@ module.exports.verifyOtp = async (req, res) => {
     user.otpVerified();
     res.status(StatusCodes.OK).json({ token: user.jwtToken });
   }
+};
+
+module.exports.getActiveRent = async (req, res) => {
+  let rent = await Rent.findOne({ user: req.user.id, endedAt: null });
+  res.status(StatusCodes.OK).json({ rent: rent?.id || false });
 };

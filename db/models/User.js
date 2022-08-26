@@ -9,13 +9,6 @@ const {
 
 const UserSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-
-      maxlength: 50,
-      minlength: 3,
-      required: [true, "name is required"],
-    },
     phone: {
       type: String,
       required: [true, "Please provide phone number"],

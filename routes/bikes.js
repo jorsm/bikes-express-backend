@@ -22,10 +22,9 @@ router.get("/location/:bikeId", getBikeLocations);
 
 router.post("/", createBike);
 router.post("/rent/:code", jwtUserAuth, rentBike);
-router.post("/return/:bikeId", jwtUserAuth, returnBike);
+router.post("/return/:rentId", jwtUserAuth, returnBike);
 router.post("/lock/:bikeId", jwtUserAuth, lockBike);
 router.post("/unlock/:bikeId", jwtUserAuth, unlockBike);
-router.post("/book/:bikeId", jwtUserAuth, bookBike);
 
 router.patch("/location/:bikeId", jwtUserAuth, updateBikeLocation);
 
