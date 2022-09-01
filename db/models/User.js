@@ -12,12 +12,13 @@ const UserSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: [true, "Please provide phone number"],
+      unique: true,
       match: [/^\+[1-9]{1}[0-9]{3,14}$/, "a valid phone number is required"],
     },
     familyCode: { type: String, length: 6 },
     otp: { type: String, length: 6, default: null },
     phone_verified: { type: Boolean, default: false },
-    free_trial: { type: Boolean, default: false },
+    free_trial: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
@@ -25,7 +26,7 @@ const UserSchema = new mongoose.Schema(
 //name and user are name in conbination
 // i can have 20 Franco user and 10 users associated with the number 3456677890
 // but only one Franco with the number  3456677890
-UserSchema.index({ name: 1, phone: 1 }, { unique: true });
+//UserSchema.index({ phone: 1 }, { unique: true });
 
 UserSchema.virtual("jwtToken").get(function () {
   return jwt.sign(
@@ -37,14 +38,24 @@ UserSchema.virtual("jwtToken").get(function () {
   );
 });
 UserSchema.methods.sendOtpSMS = async function (message, otp) {
-  message = message + otp;
-  this.set("otp", otp);
-  console.log("set OTP for user: " + otp);
+  try {
+    message = message + otp;
+    this.otp = otp;
+    this.save();
+    console.log("set OTP for user: " + otp);
+  } catch (error) {
+    throw error;
+  }
 };
 
 UserSchema.methods.otpVerified = async function () {
-  this.set({ otp: null });
-  if (!this.phone_verified) this.set({ phone_verified: true });
+  try {
+    this.otp = null;
+    this.phone_verified = true;
+    this.save();
+  } catch (error) {
+    throw error;
+  }
 };
 
 /*

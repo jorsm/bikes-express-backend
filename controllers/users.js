@@ -17,25 +17,25 @@ module.exports.signIn = async (req, res) => {
    * ToDO:  user input check
    * ToDO: delete accounts that do not verify phone number within 5 minutes
    */
-  const { name, phone } = req.body;
+  const { phone } = req.body;
   let message = "Use this code to  sign in:  ";
   let user = await User.findOne({ phone }); //check  if user is already registerd
   if (!user) {
     message = "Use this code to  verify your number:  ";
-    let phoneAlreadyUsed = await User.findOne({ phone });
     //new user
     user = await User.create({ phone });
-    if (!phoneAlreadyUsed) user.set({ free_trial: true });
     res.status(StatusCodes.CREATED);
     familyCode = await getFamilyCode();
     user.set("familyCode", familyCode);
   }
 
   if (user) {
-    const otp = await getOtp();
-    user.sendOtpSMS(message, otp);
-    user.set({ otp: otp });
-    await user.save();
+    try {
+      const otp = await getOtp();
+      user.sendOtpSMS(message, otp);
+    } catch (error) {
+      throw error;
+    }
   } else {
     throw new Error(
       "an error occourred during the account creation, try again later"

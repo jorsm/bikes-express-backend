@@ -39,13 +39,25 @@ const StationSchema = new mongoose.Schema(
 
 StationSchema.index({ location: "2dsphere" });
 
+StationSchema.virtual("isFull").get(function () {
+  return this.capacity - endStation.this.length > 0 ? false : true;
+});
+
 StationSchema.methods.startRent = async function (bikeCode) {
-  this.bikes = this.bikes.filter((_bikeCode) => _bikeCode != bikeCode);
-  this.save();
+  try {
+    this.bikes = this.bikes.filter((_bikeCode) => _bikeCode != bikeCode);
+    this.save();
+  } catch (error) {
+    throw error;
+  }
 };
 StationSchema.methods.endRent = async function (bikeCode) {
-  if (!this.bikes.includes(bikeCode)) this.bikes.push(bikeCode);
-  this.save();
+  try {
+    if (!this.bikes.includes(bikeCode)) this.bikes.push(bikeCode);
+    this.save();
+  } catch (error) {
+    throw error;
+  }
 };
 
 module.exports = mongoose.model("Station", StationSchema);

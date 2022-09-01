@@ -28,10 +28,13 @@ module.exports.getBikes = async (req, res) => {
 module.exports.createBike = async (req, res) => {
   const bike = await Bike.create({});
   if (!bike) throw new Error("unable  to create bike");
-
-  bike.code = getNewBikeCode();
-  await bike.save();
-  res.status(StatusCodes.CREATED).json({ bike });
+  try {
+    bike.code = getNewBikeCode();
+    await bike.save();
+    res.status(StatusCodes.CREATED).json({ bike });
+  } catch (error) {
+    throw error;
+  }
 };
 
 module.exports.getBike = async (req, res) => {
@@ -149,7 +152,7 @@ module.exports.returnBike = async (req, res) => {
 
   let rent = await Rent.findById(rentId, req.user.id);
   if (!rent) throw new BadRequestError("rentId is not valid");
-  await rent.endRent(endStation);
+  await rent.endRent(endStation, req.user.id);
 
   res.status(StatusCodes.OK).end();
 };

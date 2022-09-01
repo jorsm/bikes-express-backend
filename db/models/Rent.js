@@ -44,6 +44,10 @@ RentSchema.methods.startRent = async function (bikeCode, userId) {
       if (!station) throw new BadRequestError("bike not parked here");
 
       try {
+        if (user.free_trial) {
+          user.free_trial = false;
+          user.save();
+        }
         this.bikeId = bike.id;
         this.userId = userId;
         this.startStationId = station.id;
@@ -61,20 +65,19 @@ RentSchema.methods.startRent = async function (bikeCode, userId) {
     });
 };
 
-RentSchema.methods.endRent = async function (endStation, userId) {
-  if (!this.userId === userId)
-    throw new BadRequestError("wtf you can only end your own rents!");
-  stationFull =
-    endStation.capacity - endStation.bikes.length > 0 ? false : true;
-  if (stationFull)
+RentSchema.methods.endRent = async function (endStation) {
+  if (endStation.isFull)
     throw new BadRequestError("station full,  can not end rent here");
+  try {
+    this.endStationId = endStation.id;
+    this.endedAt = Date.now();
 
-  this.endStationId = endStation.id;
-  this.endedAt = Date.now();
-
-  this.save();
-  const bike = await Bike.findById(this.bikeId);
-  if (bike) bike.endRent();
-  endStation.endRent(this.bikeId);
+    this.save();
+    const bike = await Bike.findById(this.bikeId);
+    if (bike) bike.endRent();
+    endStation.endRent(this.bikeId);
+  } catch (error) {
+    throw error;
+  }
 };
 module.exports = mongoose.model("Rent", RentSchema);

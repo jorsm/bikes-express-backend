@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const BikeSchema = new mongoose.Schema(
   {
     code: {
-      type: Number,
+      type: String,
+      length: 6,
     },
     status: {
       type: String,
@@ -26,12 +27,20 @@ const BikeSchema = new mongoose.Schema(
 );
 
 BikeSchema.methods.startRent = function () {
-  this.status = "rented";
-  this.save();
+  try {
+    this.status = "rented";
+    this.save();
+  } catch (error) {
+    throw error;
+  }
 };
 BikeSchema.methods.endRent = async function () {
-  const flagToRepair = this.conditions > 2.5 ? "available" : "broken";
-  this.status.set(flagToRepair);
+  try {
+    const flagToRepair = this.conditions > 2.5 ? "available" : "broken";
+    this.status.set(flagToRepair);
+  } catch (error) {
+    throw error;
+  }
 };
 
 module.exports = mongoose.model("Bike", BikeSchema);

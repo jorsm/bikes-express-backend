@@ -16,16 +16,11 @@ getSixDigitsCode = async function (Model, field, expiresAfter = null) {
     code = code.toString().padStart(6, "0");
     codeInUse = await Model.findOne({ [field]: code });
   } while (codeInUse);
-  if (expiresAfter && expiresAfter > 0)
-    setTimeout(() => {
-      codeInUse[field].set(null);
-    }, expiresAfter);
 
   return code;
 };
 
 module.exports.getOtp = () => getSixDigitsCode(User, "otp");
-module.exports.getFamilyCode = () =>
-  getSixDigitsCode(User, "familyCode", configs.AUTH_OTP_LIFETIME);
+module.exports.getFamilyCode = () => getSixDigitsCode(User, "familyCode");
 module.exports.getNewBikeCode = () => getSixDigitsCode(Bike, "code");
 module.exports.configs = configs;
