@@ -1,3 +1,4 @@
+const { model } = require("mongoose");
 const Bike = require("../db/models/Bike");
 const User = require("../db/models/User");
 const configs = require("./configs");
@@ -16,11 +17,22 @@ getSixDigitsCode = async function (Model, field, expiresAfter = null) {
     code = code.toString().padStart(6, "0");
     codeInUse = await Model.findOne({ [field]: code });
   } while (codeInUse);
+  if (expiresAfter)
+    setTimeout(() => {
+      Model.findOne({ [field]: code }).then((modelInstance) => {
+        modelInstance.set(field, null);
+      });
+    }, expiresAfter);
 
   return code;
 };
-
-module.exports.getOtp = () => getSixDigitsCode(User, "otp");
+/**
+ * create a unique code that expires after configs.AUTH_OTP_LIFETIME
+ *
+ * @returns 6 digits string
+ */
+module.exports.getOtp = () =>
+  getSixDigitsCode(User, "otp", configs.AUTH_OTP_LIFETIME);
 module.exports.getFamilyCode = () => getSixDigitsCode(User, "familyCode");
 module.exports.getNewBikeCode = () => getSixDigitsCode(Bike, "code");
 module.exports.configs = configs;

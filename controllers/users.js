@@ -33,6 +33,8 @@ module.exports.signIn = async (req, res) => {
     try {
       const otp = await getOtp();
       user.sendOtpSMS(message, otp);
+      //ToDo: REMOVE THE LINE BELOW!!!!!!!!!
+      res.json({ otp });
     } catch (error) {
       throw error;
     }
@@ -41,7 +43,6 @@ module.exports.signIn = async (req, res) => {
       "an error occourred during the account creation, try again later"
     );
   }
-  res.end();
 };
 
 module.exports.verifyOtp = async (req, res) => {
