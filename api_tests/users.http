@@ -20,3 +20,8 @@ POST /verify
         "otp":"099817", 
         "phone": "+393456677890"
     }
+### Test PayPal webhook 
+POST /paypal
+    Content-Type: application/json
+
+    {"id": "new_payment"}

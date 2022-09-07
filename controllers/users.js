@@ -1,5 +1,4 @@
 const { StatusCodes } = require("http-status-codes");
-const errorHandlerMiddleware = require("../middleware/error-handler");
 const {
   BadRequestError,
   NotFoundError,
@@ -59,4 +58,15 @@ module.exports.verifyOtp = async (req, res) => {
 module.exports.getActiveRent = async (req, res) => {
   let rent = await Rent.findOne({ user: req.user.id, endedAt: null });
   res.status(StatusCodes.OK).json({ rent: rent?.id || false });
+};
+
+module.exports.paypalHandler = async (req, res) => {
+  /**
+   * Verify that the notification message came from PayPal
+   * Was not altered or corrupted during transmission
+   * Was targeted for you
+   * Contains a valid signature
+   */
+  console.log("paypal  webhook handler", req.body);
+  res.status(StatusCodes.OK).end();
 };
