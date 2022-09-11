@@ -25,3 +25,11 @@ POST /paypal
     Content-Type: application/json
 
     {"id": "new_payment"}
+
+### Get user rent (returns RentID or False)
+GET /rent
+    Authorization: Bearer {{jwtToken}}
+
+### Get user subscription (returns SubscriptionID or False)
+GET /subscription
+    Authorization: Bearer {{jwtToken}}

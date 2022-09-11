@@ -3,14 +3,16 @@ const router = express.Router();
 const {
   signIn,
   verifyOtp,
-  getActiveRent,
+  getRent,
   paypalHandler,
+  getSubscription,
 } = require("../controllers/users");
 const { jwtUserAuth } = require("../middleware/authentication");
 
 router.post("/sign-in/", signIn);
 router.post("/verify/", verifyOtp);
 router.post("/paypal/", paypalHandler);
-router.get("/active-rent/", jwtUserAuth, getActiveRent);
+router.get("/rent/", jwtUserAuth, getRent);
+router.get("/subscription/", jwtUserAuth, getSubscription);
 
 module.exports = router;

@@ -6,8 +6,10 @@ const {
 } = require("../errors");
 
 const User = require("../db/models/User");
-const { getFamilyCode, getOtp } = require("../utils");
 const Rent = require("../db/models/Rent");
+const Subscription = require("../db/models/Subscription");
+
+const { getFamilyCode, getOtp } = require("../utils");
 
 module.exports = {};
 
@@ -55,9 +57,17 @@ module.exports.verifyOtp = async (req, res) => {
   }
 };
 
-module.exports.getActiveRent = async (req, res) => {
+module.exports.getRent = async (req, res) => {
   let rent = await Rent.findOne({ user: req.user.id, endedAt: null });
   res.status(StatusCodes.OK).json({ rent: rent?.id || false });
+};
+
+module.exports.getSubscription = async (req, res) => {
+  let subscription = await Subscription.findOne({
+    user: req.user.id,
+    endsAt: { $gte: new Date() },
+  });
+  res.status(StatusCodes.OK).json({ rent: subscription?.id || false });
 };
 
 module.exports.paypalHandler = async (req, res) => {
