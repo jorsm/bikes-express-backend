@@ -4,15 +4,18 @@ const {
   signIn,
   verifyOtp,
   getRent,
-  paypalHandler,
   getSubscription,
+  createSubscriptionOrder,
+  acceptSubscriptionOrder,
 } = require("../controllers/users");
 const { jwtUserAuth } = require("../middleware/authentication");
 
 router.post("/sign-in/", signIn);
 router.post("/verify/", verifyOtp);
-router.post("/paypal/", paypalHandler);
+
 router.get("/rent/", jwtUserAuth, getRent);
 router.get("/subscription/", jwtUserAuth, getSubscription);
+router.post("/subscription/", jwtUserAuth, createSubscriptionOrder);
+router.post("/subscription/:orderID", jwtUserAuth, acceptSubscriptionOrder);
 
 module.exports = router;

@@ -17,7 +17,7 @@ POST /verify
     Content-Type: application/json
 
     {
-        "otp":"099817", 
+        "otp":"944699", 
         "phone": "+393456677890"
     }
 ### Test PayPal webhook 
@@ -26,10 +26,13 @@ POST /paypal
 
     {"id": "new_payment"}
 
-### Get user rent (returns RentID or False)
-GET /rent
-    Authorization: Bearer {{jwtToken}}
 
 ### Get user subscription (returns SubscriptionID or False)
 GET /subscription
     Authorization: Bearer {{jwtToken}}
+### Paypal create order request
+POST /subscription
+    Authorization: Bearer {{jwtToken}}
+    Content-Type: application/json
+
+    {"subscriptionPeriod":"Day"}

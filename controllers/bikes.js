@@ -4,12 +4,10 @@ const Rent = require("../db/models/Rent");
 const { NotFoundError, BadRequestError } = require("../errors");
 const { StatusCodes } = require("http-status-codes");
 const {
-  configs: {
-    MAX_RENTS_PER_DAY,
-    DEFAULT_LATITUDE,
-    DEFAULT_LONGITUDE,
-    DEFAULT_SEARCH_RADIUS,
-  },
+  MAX_RENTS_PER_DAY,
+  DEFAULT_LATITUDE,
+  DEFAULT_LONGITUDE,
+  DEFAULT_SEARCH_RADIUS,
 } = require("../utils/configs");
 const { getNewBikeCode } = require("../utils");
 const Station = require("../db/models/Station");

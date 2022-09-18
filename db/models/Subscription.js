@@ -7,6 +7,8 @@ const SubscriptionSchema = new mongoose.Schema({
     ref: "User",
     required: [true, "must provide user ID"],
   },
+  orderId: String,
+  transactionId: { type: String, default: null },
   startedAt: { type: Date, default: Date.now },
   endsAt: { type: Date, default: null },
 });

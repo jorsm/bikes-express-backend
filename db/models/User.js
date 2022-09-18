@@ -1,9 +1,7 @@
 const mongoose = require("mongoose");
 //const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const {
-  configs: { JWT_LIFETIME },
-} = require("../../utils/configs");
+const { JWT_LIFETIME } = require("../../utils/configs");
 
 //const privateKey = fs.readFileSync("private.key");
 

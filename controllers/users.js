@@ -1,4 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
+const axios = require("axios").default;
 const {
   BadRequestError,
   NotFoundError,
@@ -8,8 +9,12 @@ const {
 const User = require("../db/models/User");
 const Rent = require("../db/models/Rent");
 const Subscription = require("../db/models/Subscription");
+const { PAYPAL_CLIENT_ID, PAYPAL_APP_SECRET } = process.env;
+
+const paypal_url = "https://api-m.sandbox.paypal.com";
 
 const { getFamilyCode, getOtp } = require("../utils");
+const { DAY_PRICE, WEEK_PRICE, MONTH_PRICE } = require("../utils/configs");
 
 module.exports = {};
 
@@ -70,13 +75,99 @@ module.exports.getSubscription = async (req, res) => {
   res.status(StatusCodes.OK).json({ rent: subscription?.id || false });
 };
 
-module.exports.paypalHandler = async (req, res) => {
-  /**
-   * Verify that the notification message came from PayPal
-   * Was not altered or corrupted during transmission
-   * Was targeted for you
-   * Contains a valid signature
-   */
-  console.log("paypal  webhook handler", req.body);
-  res.status(StatusCodes.OK).end();
+module.exports.createSubscriptionOrder = async (req, res) => {
+  const { subscriptionPeriod } = req.body;
+  if (!subscriptionPeriod)
+    throw new BadRequestError("subscriptionPeriod is required");
+
+  let subDaysInMs = 24 * 60 * 60 * 1000;
+  switch (subscriptionPeriod) {
+    case "Day":
+      amount = DAY_PRICE;
+      break;
+    case "Week":
+      amount = WEEK_PRICE;
+      subDaysInMs = subDaysInMs * 7;
+      break;
+    case "Month":
+      amount = MONTH_PRICE;
+      subDaysInMs = subDaysInMs * 30;
+      break;
+    default:
+      throw new BadRequestError("preriod must be Day|Week|Month");
+  }
+  const now = new Date();
+  const endDate = new Date(now + subDaysInMs);
+  const accessToken = await generatePaypalAccessToken();
+
+  const url = `${paypal_url}/v2/checkout/orders`;
+  const response = await axios(url, {
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    data: JSON.stringify({
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          amount: {
+            currency_code: "EUR",
+            value: amount,
+          },
+        },
+      ],
+    }),
+  });
+  if (response.data?.status === "CREATED") {
+    //here order is created but no money is moved hence is not a valid suubscription
+    const orderID = response.data.id;
+    const subscription = new Subscription({
+      UserId: req.user.id,
+      endsAt: endDate,
+      orderId: orderID,
+    });
+    await subscription.save();
+    res.json({ orderID });
+  } else throw new Error();
 };
+
+module.exports.acceptSubscriptionOrder = async (req, res) => {
+  const { orderID } = req.params;
+  const url = `${paypal_url}/v2/checkout/orders/${orderID}/capture`;
+
+  const accessToken = await generatePaypalAccessToken();
+
+  const response = await axios(url, {
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  if (response.data?.status === "COMPLETED") {
+    const transactionId = response.data.id;
+    const subscription = await Subscription.findOne({ orderId: orderID });
+    if (subscription) {
+      subscription.transactionId = transactionId;
+      await subscription.save();
+      res.json({ subscription: subscription.id });
+    }
+  } else throw new Error();
+};
+
+async function generatePaypalAccessToken() {
+  // generate an access token using client id and app secret
+  const auth = Buffer.from(PAYPAL_CLIENT_ID + ":" + PAYPAL_APP_SECRET).toString(
+    "base64"
+  );
+  const response = await axios(`${paypal_url}/v1/oauth2/token`, {
+    method: "post",
+    data: "grant_type=client_credentials",
+    headers: {
+      Authorization: `Basic ${auth}`,
+    },
+  });
+
+  return response.data.access_token;
+}
