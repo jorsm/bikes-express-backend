@@ -151,7 +151,7 @@ module.exports.acceptSubscriptionOrder = async (req, res) => {
     if (subscription) {
       subscription.transactionId = transactionId;
       await subscription.save();
-      res.json({ subscription: subscription.id });
+      res.json({ subscriptionId: subscription.id });
     }
   } else throw new Error();
 };
