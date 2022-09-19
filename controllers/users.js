@@ -72,7 +72,7 @@ module.exports.getSubscription = async (req, res) => {
     user: req.user.id,
     endsAt: { $gte: new Date() },
   });
-  res.status(StatusCodes.OK).json({ rent: subscription?.id || false });
+  res.status(StatusCodes.OK).json({ subscription: subscription?.id || false });
 };
 
 module.exports.createSubscriptionOrder = async (req, res) => {
@@ -96,8 +96,8 @@ module.exports.createSubscriptionOrder = async (req, res) => {
     default:
       throw new BadRequestError("preriod must be Day|Week|Month");
   }
-  const now = new Date();
-  const endDate = new Date(now + subDaysInMs);
+
+  const endDate = new Date(Date.now() + subDaysInMs);
   const accessToken = await generatePaypalAccessToken();
 
   const url = `${paypal_url}/v2/checkout/orders`;
@@ -146,10 +146,9 @@ module.exports.acceptSubscriptionOrder = async (req, res) => {
     },
   });
   if (response.data?.status === "COMPLETED") {
-    const transactionId = response.data.id;
     const subscription = await Subscription.findOne({ orderId: orderID });
     if (subscription) {
-      subscription.transactionId = transactionId;
+      subscription.paymentConfirmed = true;
       await subscription.save();
       res.json({ subscriptionId: subscription.id });
     }

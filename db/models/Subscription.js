@@ -9,6 +9,7 @@ const SubscriptionSchema = new mongoose.Schema({
   },
   orderId: String,
   transactionId: { type: String, default: null },
+  paymentConfirmed: { type: Boolean, default: false },
   startedAt: { type: Date, default: Date.now },
   endsAt: { type: Date, default: null },
 });
