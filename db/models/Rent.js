@@ -33,21 +33,15 @@ const RentSchema = new mongoose.Schema({
 RentSchema.methods.startRent = async function (bikeCode, userId) {
   let checks = [
     Bike.findOne({ code: bikeCode, status: "available" }).exec(),
-    User.findById(userId).exec(),
     Station.findOne({ bikes: bikeCode }).exec(),
   ];
 
   return await Promise.all(checks)
-    .then(async ([bike, user, station]) => {
+    .then(async ([bike, station]) => {
       if (!bike) throw new BadRequestError("bike not available for rent");
-      if (!user) throw new BadRequestError("user not found");
       if (!station) throw new BadRequestError("bike not parked here");
 
       try {
-        if (user.free_trial) {
-          user.free_trial = false;
-          user.save();
-        }
         this.bikeId = bike.id;
         this.userId = userId;
         this.startStationId = station.id;

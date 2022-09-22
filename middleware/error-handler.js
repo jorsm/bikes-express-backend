@@ -24,12 +24,6 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     customError.statusCode = 404;
   }
 
-  if (err instanceof UnauthorizedError) {
-    return res
-      .status(err.statusCode)
-      .json({ error: err.message })
-      .redirect("/user/login");
-  }
   console.error(err);
   return res.status(customError.statusCode).json({ error: customError.error });
 };

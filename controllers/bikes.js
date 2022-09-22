@@ -1,6 +1,7 @@
 const Bike = require("../db/models/Bike");
 const Location = require("../db/models/Location");
 const Rent = require("../db/models/Rent");
+const User = require("../db/models/User");
 const { NotFoundError, BadRequestError } = require("../errors");
 const { StatusCodes } = require("http-status-codes");
 const {
@@ -9,7 +10,7 @@ const {
   DEFAULT_LONGITUDE,
   DEFAULT_SEARCH_RADIUS,
 } = require("../utils/configs");
-const { getNewBikeCode } = require("../utils");
+const { getNewBikeCode, checkValidSubscription } = require("../utils");
 const Station = require("../db/models/Station");
 
 module.exports = {};
@@ -98,12 +99,12 @@ module.exports.rentBike = async (req, res) => {
   /**
    * TODO: sanitize user input
    **/
-  const alreadyOnRent = await Rent.countDocuments({
+  const userAlreadyOnRent = await Rent.countDocuments({
     userId: req.user.id,
     endedAt: null,
   });
-  if (alreadyOnRent)
-    throw new BadRequestError("only one bike can be booked at a time");
+  if (userAlreadyOnRent)
+    throw new BadRequestError("only one bike can be rented at a time");
 
   var midnight = new Date().setHours(0, 0, 0, 0);
   const todayRents = await Rent.countDocuments({
@@ -113,16 +114,17 @@ module.exports.rentBike = async (req, res) => {
 
   if (todayRents >= MAX_RENTS_PER_DAY)
     throw new BadRequestError(
-      "cannot rent more than " + MAX_RENTS_PER_DAY + "per day"
+      "cannot rent more than " + MAX_RENTS_PER_DAY + "times per day"
     );
   //ToDo: manage on frontend?
 
   const { code } = req.params;
   const userId = req.user.id;
-  //ToDo: check valid payment status and if first_rent
-  const { rent, bike, station } = await new Rent().startRent(code, userId);
-
-  res.status(StatusCodes.CREATED).json({ rentId: rent.id });
+  let validSubscription = checkValidSubscription(userId);
+  if (validSubscription) {
+    const { rent, bike, station } = await new Rent().startRent(code, userId);
+    res.status(StatusCodes.CREATED).json({ rentId: rent.id });
+  } else throw new BadRequestError("subscription for user is not valid");
 };
 module.exports.returnBike = async (req, res) => {
   /**
@@ -148,9 +150,17 @@ module.exports.returnBike = async (req, res) => {
     },
   });
 
+  let user = await User.findById(req.user.id);
+  if (user.free_trial) {
+    user.free_trial = false;
+    user.save();
+  }
   let rent = await Rent.findById(rentId, req.user.id);
+
+  //ToDo:  if the user takes more than 1 hour to return the bike the subscription should be suspended until a fine is payed
   if (!rent) throw new BadRequestError("rentId is not valid");
-  await rent.endRent(endStation, req.user.id);
+  let timeRented = Date.now() - rent.startedAt;
+  if (timeRented > MAX_TIME_PER_RENT) await rent.endRent(endStation);
 
   res.status(StatusCodes.OK).end();
 };

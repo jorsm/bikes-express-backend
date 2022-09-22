@@ -13,7 +13,7 @@ const { PAYPAL_CLIENT_ID, PAYPAL_APP_SECRET } = process.env;
 
 const paypal_url = "https://api-m.sandbox.paypal.com";
 
-const { getFamilyCode, getOtp } = require("../utils");
+const { getFamilyCode, getOtp, checkValidSubscription } = require("../utils");
 const { DAY_PRICE, WEEK_PRICE, MONTH_PRICE } = require("../utils/configs");
 
 module.exports = {};
@@ -68,11 +68,8 @@ module.exports.getRent = async (req, res) => {
 };
 
 module.exports.getSubscription = async (req, res) => {
-  let subscription = await Subscription.findOne({
-    user: req.user.id,
-    endsAt: { $gte: new Date() },
-  });
-  res.status(StatusCodes.OK).json({ subscription: subscription?.id || false });
+  let subscription = checkValidSubscription();
+  res.status(StatusCodes.OK).json({ subscription });
 };
 
 module.exports.createSubscriptionOrder = async (req, res) => {
